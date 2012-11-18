@@ -8,7 +8,7 @@ Gem::Specification.new do |gem|
   gem.summary       = %q{A Resque plugin to modify the worker behavior to pull jobs off queues, round-robin}
   gem.homepage      = ""
 
-  gem.add_dependency "resque", "1.19.0"
+  gem.add_dependency "resque", "~> 1.19"
   gem.add_dependency "resque-dynamic-queues"
 
   gem.add_development_dependency('rspec', '~> 2.5')
