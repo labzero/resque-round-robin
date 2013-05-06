@@ -9,12 +9,13 @@ module Resque::Plugins
     def rotated_queues
       @n ||= 0
       @n += 1
-      rot_queues = queues # since we rely on the resque-dynamic-queues plugin, this is all the queues, expanded out
-      if rot_queues.size > 0
-        @n = @n % rot_queues.size
-        rot_queues.rotate(@n)
+      # since we rely on the resque-dynamic-queues plugin, this is all the queues, expanded out
+      queues_hash = priority_queues_hash queues
+      if queues_hash[:norm].size > 0
+        @n = @n % queues_hash[:norm].size
+        queues_hash[:priority] + queues_hash[:norm].rotate(@n)
       else
-        rot_queues
+        queues_hash[:priority] + queues_hash[:norm]
       end
     end
 
@@ -40,6 +41,8 @@ module Resque::Plugins
 
     def reserve_with_round_robin
       qs = rotated_queues
+      # then break them into 2 buckets - priority and norm; prepending the priority based ones first
+
       qs.each do |queue|
         log! "Checking #{queue}"
         if should_work_on_queue?(queue) && job = Resque::Job.reserve(queue)
@@ -47,7 +50,7 @@ module Resque::Plugins
           return job
         end
         # Start the next search at the queue after the one from which we pick a job.
-        @n += 1
+        @n += 1 unless is_queue_priority queue
       end
 
       nil
@@ -57,11 +60,31 @@ module Resque::Plugins
       raise e
     end
 
+    def priority_queues_hash(qs)
+      queue_hash = {}
+      queue_hash[:priority] = []
+      queue_hash[:norm] = []
+      qs.each do |q|
+        if is_queue_priority q
+          queue_hash[:priority] << q
+        else
+          queue_hash[:norm] << q
+        end
+      end
+      queue_hash
+    end
+
     def self.included(receiver)
       receiver.class_eval do
         alias reserve_without_round_robin reserve
         alias reserve reserve_with_round_robin
       end
+    end
+
+    private
+
+    def is_queue_priority(q)
+      q =~ /^_priority_/
     end
 
   end # RoundRobin

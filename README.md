@@ -1,6 +1,15 @@
 Resque-round-robin
 ==================
 
+## Forked Version
+
+This is a forked version that adds priority based queues which will
+get processed first (in round robin fashion) before the other queues.
+Priority based queues are simply prefixed with '_priority_'.
+
+
+## Overview
+
 A plugin for Resque that implements round-robin behavior for workers.
 
 resque-dynamic-queues is a pre-requisite, as is Resque 1.19 or higher
