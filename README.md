@@ -4,8 +4,8 @@ Resque-round-robin
 ## Forked Version
 
 This is a forked version that adds priority based queues which will
-get processed first (in round robin fashion) before the other queues.
-Priority based queues are simply prefixed with '_priority_'.
+get processed first sequentially before the other queues do with round-robin.
+Priority based queues are either named or prefixed with '_priority_'.
 
 
 ## Overview
